@@ -1,0 +1,293 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="format-detection" content="email=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="full-screen" content="yes">
+	<meta name="browsermode" content="application">
+	<meta name="x5-orientation" content="landscape">
+	<meta name="x5-fullscreen" content="true">
+	<meta name="x5-page-mode" content="app">
+	<link rel="shortcut icon" href="images/index.jpg" type="image/x-icon">
+	<title>小霸王摸鱼游戏机</title>
+
+	<link href="css/jsnes.css" rel="stylesheet" type="text/css">
+	<style>
+			.function button,
+			.action button {
+				color: #000;
+			}
+
+			.function button {
+				height: 32px;
+				width: auto;
+			}
+
+			.nes-roms>select {
+				width: 100%;
+				height: 30px;
+			}
+
+			.nes-controls{
+				text-align: start;
+			}
+
+			.game-window {
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+
+</head>
+<body>
+<!-- 启动声音，需要请取消注释 -->
+<embed src="bgm.mp3" hidden="true" autostart="true" loop="true" />
+
+<div style="margin:0 auto;margin-top:15px;text-align:center;">在线摸鱼用户</div>
+<div id="you" style="margin:0 auto;margin-top:10px;text-align:center;"></div>
+<div id="moyu-count" style="margin:0 auto;margin-top:10px;text-align:center;"></div>
+<div id="moyu" style="margin:0 auto;margin-top:20px;width:750px;height:150px;word-wrap:break-word;">
+
+</div>
+
+<div class="main">
+	<div class="panel">
+		<div class="controller-area">
+			<div class="controller">
+				<div id="controls-direction">
+					<button role="BUTTON_UP" class="up joydirection" id="joystick_btn_up">上(W)</button>
+					<button role="BUTTON_RIGHT" class="right joydirection" id="joystick_btn_right">右(D)</button>
+					<button role="BUTTON_DOWN" class="down joydirection" id="joystick_btn_down">下(S)</button>
+					<button role="BUTTON_LEFT" class="left joydirection" id="joystick_btn_left">左(A)</button>
+				</div>
+			</div>
+			<!-- <div class="joy">X</div> -->
+		</div>
+
+		<div class="function-area">
+			<div class="screen">
+				<div class="game-window" id="emulator" align="center"></div>
+			</div>
+			<div class="function">
+				<button class="controls-center-select joybtn" id="joystick_btn_select" role="BUTTON_SELECT">Select</button>
+				<button class="controls-center-start joybtn" id="joystick_btn_start" role="BUTTON_START">Pause</button>
+			</div>
+		</div>
+
+		<div class="action-area">
+			<div class="action">
+				<div id="controls-fire">
+					<button class="a joybtn" role="BUTTON_A" id="joystick_btn_A">手(J)</button>
+					<button class="b joybtn" role="BUTTON_B" id="joystick_btn_B">脚(K)</button>
+				</div>
+			</div>
+		</div>
+		<!-- <div class="sign">FAMILY <br> COMPUTER</div> -->
+	</div>
+	<div>
+		<a href="shuoming.html" target="_blank" class="readme">帮助</a>
+	</div>
+
+</div>
+<!--
+<div>
+   <div><a href="https://www.jdcloud.com/cn/products/light-virtual-machines" target="_blank" style="text-align:center;color:yellow;">京东云，好用的云！—— 老板说：点一点，下个月还给我服务器玩小霸王！</a> </div>
+   <div><a href="https://www.jdcloud.com/cn/products/light-virtual-machines" target="_blank" style="text-align:center;color:red;">京东云，好用的云！—— 老板说：点一点，下个月还给我服务器玩小霸王！</a> </div>  
+   <div><a href="https://www.jdcloud.com/cn/products/light-virtual-machines" target="_blank" style="text-align:center;color:#009876;">京东云，好用的云！—— 老板说：点一点，下个月还给我服务器玩小霸王！</a> </div>
+</div>
+-->
+
+</body>
+<script src="js/jquery-1.4.2.min.js" tppabs="jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/dynamicaudio-min.js" tppabs="dynamicaudio-min.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/nes.js" tppabs="nes.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/utils.js" tppabs="sutils.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/cpu.js" tppabs="cpu.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/keyboard.js" tppabs="keyboard.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/mappers.js" tppabs="mappers.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/papu.js" tppabs="papu.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/ppu.js" tppabs="ppu.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/rom.js" tppabs="rom.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/ui.js" tppabs="ui.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/debug.js" tppabs="debug.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/random-name.js" tppabs="random-name.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+		var nes;
+		$(function() {
+			nes = new JSNES({
+				'ui': $('#emulator').JSNESUI({
+					"经典": [
+						['魂斗罗', 'roms/Contra1(U)30.nes'],
+						['超级玛丽', 'roms/(W) Super Mario Bros. [!].nes'],
+						['坦克', 'roms/(Ch) Missile Tank.nes'],
+						['双截龙', 'roms/Double Dragon1.nes'],
+						['冒险岛', 'roms/maoxiandao.nes'],
+						['中国象棋', 'roms/Zhong Guo Xiang Qi.nes'],
+						['雪人兄弟', 'roms/xueren.nes'],
+						['越野摩托', 'roms/Motor.nes'],
+						['赤影战士', 'roms/Kage.nes'],
+						['炸弹人', 'roms/zhadan.nes'],
+						['马戏团', 'roms/ma.nes'],
+						['沙罗曼蛇', 'roms/Life Force [!].nes'],
+						['脱狱', 'roms/Cross Fire (J).nes'],
+						['功夫', 'roms/(J) (V1.2) Yie Ar Kung-Fu [!].nes'],
+						['双截龙2', 'roms/Double Dragon2.nes'],
+						['三目童子', 'roms/3.nes'],
+						['恶魔城1', 'roms/emc.nes'],
+						['洛克人1', 'roms/lkr.nes'],
+						['人间兵器', 'roms/rjbq.nes'],
+						['忍者神龟1', 'roms/sg1.nes'],
+						['激龟快打', 'roms/sg1.nes'],
+						['泡泡龙2', 'roms/ppl2.nes'],
+						['西游记1', 'roms/xyj1.nes'],
+						['沙罗曼蛇', 'roms/Lifeforce (U).nes'],
+						['淘金者', 'roms/Championship Lode Runner (J).nes'],
+						['冒险岛3', 'roms/maoxiandao3.nes'],
+						['俄罗斯方块', 'roms/elsfk.nes'],
+						['黑客', 'roms/hk.nes'],
+						['汤姆历险记', 'roms/tmlxj.nes'],
+						['绿野仙踪', 'roms/nyxz.nes'],
+						['公路赛车', 'roms/glsc.nes'],
+						['屠龙记4', 'roms/tlj4.nes'],
+						['圣灵传说', 'roms/slcs.nes'],
+						['魔法总动员', 'roms/mfzdy.nes'],
+						['口袋妖怪', 'roms/kdyg.nes'],
+						['武士魂', 'roms/wsh.nes'],
+						['阿拉丁', 'roms/ald.nes'],
+						['蝙蝠侠', 'roms/bfx.nes'],
+						['时空小子', 'roms/skxz.nes'],
+						['铁血战士', 'roms/txzs.nes'],
+						['汤姆和杰瑞和塔菲', 'roms/tangmu.nes'],
+						['总决战', 'roms/zjz.nes'],
+						['赤影战士', 'roms/cyzs.nes'],
+						['最游记之唐三藏', 'roms/zyj.nes'],
+						['围棋大战', 'roms/wqdzz.nes'],
+						['四川麻将-制服篇', 'roms/scmj.nes'],
+						['吃豆小精灵', 'roms/cdxjl.nes'],
+						['异形之太空探险者', 'roms/yx.nes'],
+						['武林外传', 'roms/wlwz.nes'],
+						['东方传说', 'roms/dfcs.nes'],
+						['杀戮战场', 'roms/slzc.nes'],
+						['救火英雄', 'roms/jhyx.nes'],
+					],
+					"经典2": [
+						['快乐猫', 'roms/klm.nes'],
+						['机器猫', 'roms/jqm.nes'],
+						['f1赛车', 'roms/f1sc.nes'],
+						['米老鼠大冒险', 'roms/mlsdmx.nes'],
+						['成龙之龙', 'roms/clzl.nes'],
+						['挖地雷', 'roms/wdl.nes'],
+						['弹珠台', 'roms/dzt.nes'],
+						['魔道士阴谋', 'roms/mdsym.nes'],
+						['古墓丽影', 'roms/gmly.nes'],
+						['炸弹人', 'roms/zdr.nes'],
+						['冒险岛4', 'roms/mxd4.nes'],
+						['4人麻将', 'roms/4rmj.nes'],
+						['合金风暴', 'roms/hjfb.nes'],
+						['红楼梦', 'roms/hlm.nes'],
+						['坦克风云', 'roms/tkfy.nes'],
+						['幽灵列车', 'roms/yllc.nes'],
+						['银河时代', 'roms/yhsd.nes'],
+						['网球', 'roms/wq.nes'],
+						['神探柯蓝', 'roms/stkl.nes'],
+						['梦幻', 'roms/mh.nes'],
+						['梦企鹅物语', 'roms/mqewy.nes'],
+						['欧陆之战', 'roms/elzz.nes'],
+					],
+					"经典3": [
+						['碰碰车', 'roms/ppc.nes'],
+						['皮卡丘', 'roms/pkq.nes'],
+						['外星战将', 'roms/wxzj.nes'],
+					]
+				})
+			});
+		});
+	</script>
+<script>
+
+	 var familyNames = new Array(
+        "赵",  "钱",  "孙",  "李",  "周",  "吴",  "郑",  "王",  "冯",  "陈",
+        "褚",  "卫",  "蒋",  "沈",  "韩",  "杨",  "朱",  "秦",  "尤",  "许",
+        "何",  "吕",  "施",  "张",  "孔",  "曹",  "严",  "华",  "金",  "魏",
+        "陶",  "姜",  "戚",  "谢",  "邹",  "喻",  "柏",  "水",  "窦",  "章",
+        "云",  "苏",  "潘",  "葛",  "奚",  "范",  "彭",  "郎",  "鲁",  "韦",
+        "昌",  "马",  "苗",  "凤",  "花",  "方",  "俞",  "任",  "袁",  "柳",
+        "酆",  "鲍",  "史",  "唐",  "费",  "廉",  "岑",  "薛",  "雷",  "贺",
+        "倪",  "汤",  "滕",  "殷",  "罗",  "毕",  "郝",  "邬",  "安",  "常",
+        "乐",  "于",  "时",  "傅",  "皮",  "卞",  "齐",  "康",  "伍",  "余",
+        "元",  "卜",  "顾",  "孟",  "平",  "黄",  "和",  "穆",  "萧",  "尹"
+        );
+    var givenNames = new Array(
+        "子璇", "淼", "国栋", "夫子", "瑞堂", "甜", "敏", "尚", "国贤", "贺祥", "晨涛",
+        "昊轩", "易轩", "益辰", "益帆", "益冉", "瑾春", "瑾昆", "春齐", "杨", "文昊",
+        "东东", "雄霖", "浩晨", "熙涵", "溶溶", "冰枫", "欣欣", "宜豪", "欣慧", "建政",
+        "美欣", "淑慧", "文轩", "文杰", "欣源", "忠林", "榕润", "欣汝", "慧嘉", "新建",
+        "建林", "亦菲", "林", "冰洁", "佳欣", "涵涵", "禹辰", "淳美", "泽惠", "伟洋",
+        "涵越", "润丽", "翔", "淑华", "晶莹", "凌晶", "苒溪", "雨涵", "嘉怡", "佳毅",
+        "子辰", "佳琪", "紫轩", "瑞辰", "昕蕊", "萌", "明远", "欣宜", "泽远", "欣怡",
+        "佳怡", "佳惠", "晨茜", "晨璐", "运昊", "汝鑫", "淑君", "晶滢", "润莎", "榕汕",
+        "佳钰", "佳玉", "晓庆", "一鸣", "语晨", "添池", "添昊", "雨泽", "雅晗", "雅涵",
+        "清妍", "诗悦", "嘉乐", "晨涵", "天赫", "?傲", "佳昊", "天昊", "萌萌", "若萌"
+        );
+
+    var i = parseInt(10 * Math.random())*10 + parseInt(10 * Math.random());
+    var familyName = familyNames[i];
+
+    var j = parseInt(10 * Math.random())*10 + parseInt(10 * Math.random());
+    var givenName = givenNames[i];
+
+    var name = familyName + givenName;
+
+		$.ajax({
+				url: 'http://116.198.35.70/api/index.php',
+				type: "GET",
+				dataType: "json",
+				data: {
+					user: name
+				}
+			})
+
+	$('#you').text('你的昵称（随机）：'+name);
+
+ $.ajax({
+				url: 'http://116.198.35.70/api/list.php',
+				type: "GET",
+				success: function (data) {
+
+                    $('#moyu').text('摸鱼用户：'+JSON.stringify(JSON.parse(data)));
+				},
+				error: function (data) {
+					console.info('error');
+				}
+			})
+			
+			$.ajax({
+				url: 'http://116.198.35.70/api/count.php',
+				type: "GET",
+				success: function (data) {
+                    $('#moyu-count').text('今天摸鱼用户（总数）：'+data);
+				},
+				error: function (data) {
+					console.info('error');
+				}
+			})
+			
+setInterval(() => {
+                $.ajax({
+				url: 'http://116.198.35.70/api/count.php',
+				type: "GET",
+				success: function (data) {
+                    $('#moyu-count').text('今天摸鱼用户（总数）：'+data);
+				},
+				error: function (data) {
+					console.info('error');
+				}
+			})
+            }, 1500);
+
+
+</script>
+</html>
